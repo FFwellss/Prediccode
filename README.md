@@ -1,2 +1,3 @@
 # Prediccode
-Dự đoán mã
+Lấy tìm segment và lấy product code
+
