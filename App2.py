@@ -46,10 +46,6 @@ if uploaded_file is not None:
     # Áp dụng hàm find_product_code cho cột 'Mo_ta' trong DataFrame mới
     new_df['Predicted_Product_code'] = new_df['Mo_ta'].apply(find_product_code)
 
-    # In ra DataFrame mới với cột 'Predicted_Product_code'
-    st.write("Dữ liệu mới với mã sản phẩm dự đoán:")
-    st.dataframe(new_df)
-
     # Lưu DataFrame mới với cột 'Predicted_Product_code' vào một file Excel mới
     output_file_path = 'New_Product_Codes_with_Predictions.xlsx'
     new_df.to_excel(output_file_path, index=False)
