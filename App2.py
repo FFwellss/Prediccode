@@ -33,9 +33,6 @@ if uploaded_file is not None:
     # Đọc tệp Excel mới từ người dùng
     new_df = pd.read_excel(uploaded_file)
 
-    # In ra DataFrame mới để kiểm tra
-    st.write("Dữ liệu mới:")
-    st.dataframe(new_df.head())
 
     # Sử dụng mô hình đã huấn luyện để tìm Product_code trong file mới
     def find_product_code(description):
