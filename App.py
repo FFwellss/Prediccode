@@ -44,7 +44,7 @@ model2 = LogisticRegression()
 model2.fit(X2_vec, y2)
 
 # Tạo phần tải lên tệp Excel từ người dùng
-uploaded_file = st.file_uploader("Tải lên tệp Excel mới với 2 trường HSCODE vs Mô Tả", type=["xlsx"])
+uploaded_file = st.file_uploader("Upload 2 trường trường HSCODE vs Mô Tả để lấy Segment và ProductCode", type=["xlsx"])
 
 if uploaded_file is not None:
     # Đọc tệp Excel mới từ người dùng
