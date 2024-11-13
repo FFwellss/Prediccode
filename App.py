@@ -34,7 +34,7 @@ uploaded_file = st.file_uploader("Tải lên file Excel", type=["xlsx"])
 
 if uploaded_file is not None:
     df_new = pd.read_excel(uploaded_file)
-    df_new['Code'] = ''
+    df_new['Segment'] = ''
 
     # Dự đoán và cập nhật 'Code'
     def predict_and_update_code(row):
@@ -46,7 +46,7 @@ if uploaded_file is not None:
             return model.predict(input_vec)[0]
         return None
 
-    df_new['Code'] = df_new.apply(predict_and_update_code, axis=1)
+    df_new['Segment'] = df_new.apply(predict_and_update_code, axis=1)
 
     # Lưu và tải xuống file đã cập nhật
     output_file_path = 'updated_data.xlsx'
