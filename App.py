@@ -29,7 +29,7 @@ joblib.dump(model, 'trained_model.joblib')
 joblib.dump(vectorizer, 'tfidf_vectorizer.joblib')
 
 # Tạo giao diện Streamlit
-st.title("Dự đoán phân đoạn sản phẩm")
+st.title("Xuất thông tin Segement")
 uploaded_file = st.file_uploader("Tải lên file Excel", type=["xlsx"])
 
 if uploaded_file is not None:
