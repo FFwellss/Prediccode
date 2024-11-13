@@ -9,7 +9,7 @@ import re
 import joblib
 
 
-df = pd.read_excel("SegmentDectect.xlsx") 
+df = pd.read_excel("Prediccode//SegmentDectect.xlsx") 
 dflean = df[['Mo_ta', 'Segment']]
 
 # Preprocess data
