@@ -1,27 +1,15 @@
 # prompt: gôm gọn đoạn code bên trên lại giúp tôi
 
 import pandas as pd
-import gspread
-from google.colab import auth
-from google.auth import default
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 import re
-from google.colab import files
 import joblib
 
-# Authenticate and authorize
-auth.authenticate_user()
-creds, _ = default()
-gc = gspread.authorize(creds)
 
-# Get data from Google Sheet
-spreadsheet = gc.open('Segment Dectect')
-worksheet = spreadsheet.worksheet('Sheet1')
-data = worksheet.get_all_values()
-df = pd.DataFrame(data[1:], columns=data[0])
+df = pd.read_excel("SegmentDectect.xlsx") 
 dflean = df[['Mo_ta', 'Segment']]
 
 # Preprocess data
