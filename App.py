@@ -1,56 +1,78 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-import joblib
-import re
 import streamlit as st
-
-# Đọc dữ liệu từ file Excel
-df = pd.read_excel('Segment Dectect.xlsx') 
-dflean = df[['Mo_ta', 'Segment']]
-
-# Tiền xử lý dữ liệu
-dflean['Mo_ta'] = dflean['Mo_ta'].str.lower().str.replace('[^a-zA-Z0-9\s]', '', regex=True)
-
-# Chia dữ liệu và huấn luyện mô hình
-X = dflean['Mo_ta']
-y = dflean['Segment']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-vectorizer = TfidfVectorizer()
-X_train_vec = vectorizer.fit_transform(X_train)
-
-model = LogisticRegression()
-model.fit(X_train_vec, y_train)
-
-# Lưu mô hình và vectorizer
-joblib.dump(model, 'trained_model.joblib')
-joblib.dump(vectorizer, 'tfidf_vectorizer.joblib')
+import re
 
 # Tạo giao diện Streamlit
-st.title("Xuất thông tin Segement")
-uploaded_file = st.file_uploader("Tải lên file Excel", type=["xlsx"])
+st.title("Dự đoán Product Code và Segment từ mô tả sản phẩm")
+
+# Huấn luyện mô hình Random Forest
+train_file_path_1 = "Product Code.xlsx"  # Đường dẫn đến tệp huấn luyện đầu tiên
+df1 = pd.read_excel(train_file_path_1)
+
+# Chuẩn bị dữ liệu cho mô hình 1
+df1['Mo_ta'] = df1['Mo_ta'].astype(str)
+df1['Product_code'] = df1['Product_code'].astype(str)
+df1['HScode'] = df1['HScode'].astype(str)
+
+df1['Combined_Features'] = df1['HScode'] + ' ' + df1['Mo_ta']
+
+vectorizer1 = TfidfVectorizer()
+X1 = vectorizer1.fit_transform(df1['Combined_Features'])
+y1 = df1['Product_code']
+
+model1 = RandomForestClassifier(n_estimators=100, random_state=42)
+model1.fit(X1, y1)
+
+# Huấn luyện mô hình Logistic Regression
+train_file_path_2 = "Segment Dectect.xlsx"  # Đường dẫn đến tệp huấn luyện thứ hai
+df2 = pd.read_excel(train_file_path_2)
+dflean = df2[['Mo_ta', 'Segment']]
+
+# Tiền xử lý dữ liệu cho mô hình 2
+dflean['Mo_ta'] = dflean['Mo_ta'].str.lower().str.replace('[^a-zA-Z0-9\s]', '', regex=True)
+
+X2 = dflean['Mo_ta']
+y2 = dflean['Segment']
+
+vectorizer2 = TfidfVectorizer()
+X2_vec = vectorizer2.fit_transform(X2)
+
+model2 = LogisticRegression()
+model2.fit(X2_vec, y2)
+
+# Tạo phần tải lên tệp Excel từ người dùng
+uploaded_file = st.file_uploader("Tải lên tệp Excel mới", type=["xlsx"])
 
 if uploaded_file is not None:
-    df_new = pd.read_excel(uploaded_file)
-    df_new['Segment'] = ''
+    # Đọc tệp Excel mới từ người dùng
+    new_df = pd.read_excel(uploaded_file)
 
-    # Dự đoán và cập nhật 'Code'
-    def predict_and_update_code(row):
+    # Dự đoán Product Code từ mô hình 1
+    def find_product_code(description):
+        description_vec = vectorizer1.transform([description])
+        predicted_product_code = model1.predict(description_vec)[0]
+        return predicted_product_code
+
+    # Dự đoán Segment từ mô hình 2
+    def predict_segment(row):
         product_description = row['Mo_ta']
         if pd.notna(product_description):
             product_description = product_description.lower()
             product_description = re.sub(r'[^a-zA-Z0-9\s]', '', product_description)
-            input_vec = vectorizer.transform([product_description])
-            return model.predict(input_vec)[0]
+            input_vec = vectorizer2.transform([product_description])
+            return model2.predict(input_vec)[0]
         return None
 
-    df_new['Segment'] = df_new.apply(predict_and_update_code, axis=1)
+    # Áp dụng hàm dự đoán cho cột 'Mo_ta' trong DataFrame mới
+    new_df['Predicted_Product_code'] = new_df['Mo_ta'].apply(find_product_code)
+    new_df['Predicted_Segment'] = new_df.apply(predict_segment, axis=1)
 
-    # Lưu và tải xuống file đã cập nhật
-    output_file_path = 'updated_data.xlsx'
-    df_new.to_excel(output_file_path, index=False)
-    
-    st.success("Dự đoán hoàn tất! Tải xuống file đã cập nhật:")
-    st.download_button("Tải xuống file Excel", data=open(output_file_path, 'rb'), file_name='updated_data.xlsx')
+    # Lưu DataFrame mới với các cột dự đoán vào một file Excel mới
+    output_file_path = 'New_Product_Codes_and_Segments.xlsx'
+    new_df.to_excel(output_file_path, index=False)
+
+    st.success(f"Dữ liệu đã được lưu vào {output_file_path}.")
+    st.download_button("Tải xuống file Excel đã dự đoán", data=open(output_file_path, 'rb'), file_name=output_file_path)
