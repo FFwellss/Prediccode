@@ -6,7 +6,7 @@ import streamlit as st
 import re
 
 # Tạo giao diện Streamlit
-st.title("Dự đoán Product Code và Segment từ mô tả sản phẩm")
+st.title("Lấy ProductCode vs Segment")
 
 # Huấn luyện mô hình Random Forest
 train_file_path_1 = "Product Code.xlsx"  # Đường dẫn đến tệp huấn luyện đầu tiên
@@ -44,7 +44,7 @@ model2 = LogisticRegression()
 model2.fit(X2_vec, y2)
 
 # Tạo phần tải lên tệp Excel từ người dùng
-uploaded_file = st.file_uploader("Tải lên tệp Excel mới", type=["xlsx"])
+uploaded_file = st.file_uploader("Tải lên tệp Excel mới với 2 trường HSCODE vs Mô Tả", type=["xlsx"])
 
 if uploaded_file is not None:
     # Đọc tệp Excel mới từ người dùng
@@ -67,12 +67,12 @@ if uploaded_file is not None:
         return None
 
     # Áp dụng hàm dự đoán cho cột 'Mo_ta' trong DataFrame mới
-    new_df['Predicted_Product_code'] = new_df['Mo_ta'].apply(find_product_code)
-    new_df['Predicted_Segment'] = new_df.apply(predict_segment, axis=1)
+    new_df['Product_code'] = new_df['Mo_ta'].apply(find_product_code)
+    new_df['Segment'] = new_df.apply(predict_segment, axis=1)
 
     # Lưu DataFrame mới với các cột dự đoán vào một file Excel mới
-    output_file_path = 'New_Product_Codes_and_Segments.xlsx'
+    output_file_path = 'Product_Segment.xlsx'
     new_df.to_excel(output_file_path, index=False)
 
     st.success(f"Dữ liệu đã được lưu vào {output_file_path}.")
-    st.download_button("Tải xuống file Excel đã dự đoán", data=open(output_file_path, 'rb'), file_name=output_file_path)
+    st.download_button("Tải xuống file Excel", data=open(output_file_path, 'rb'), file_name=output_file_path)
